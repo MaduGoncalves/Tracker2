@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 import java.util.List;
 
@@ -20,4 +21,9 @@ public interface GenderDao {
 
     @Delete
     void apagar(Gender g);
+
+    // O @Transaction é obrigatório porque o Room fará múltiplos SELECTs
+    @Transaction
+    @Query("SELECT * FROM genders")
+    List<GenderWithMusics> getGendersWithMusics();
 }

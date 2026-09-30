@@ -45,9 +45,12 @@ dependencies {
     );
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
-    implementation(libs.constraintlayout)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation(libs.constraintlayout)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
 }
