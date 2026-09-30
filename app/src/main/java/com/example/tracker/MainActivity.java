@@ -1,5 +1,6 @@
 package com.example.tracker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -7,6 +8,7 @@ import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 
+import com.example.tracker.model.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private ActivityMainBinding binding;
 
+    private User currentUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,12 +49,13 @@ public class MainActivity extends AppCompatActivity {
         });
         setSupportActionBar(binding.toolbar);
 
-        // Instancia o SharedViewModel
         viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
+        BottomNavigationView bottomNav = binding.bottomNav;
+
+        //  ---------------------- gerenciando a navegacao
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_content_main);
-
         if (navHostFragment != null) {
             // navController = gerenciador de rotas do android (sabe qual tela está ativa e para onde ir)
             navController = navHostFragment.getNavController();
@@ -61,66 +66,39 @@ public class MainActivity extends AppCompatActivity {
 
             NavigationUI.setupActionBarWithNavController( this, navController, appBarConfiguration);
 
-            // pegando a barra de navegacao do xml
-            BottomNavigationView bottomNavigationView = binding.bottomNav;
 
             // conectando os cliques dos botoes do menu com a troca de telas do navcontroller
-            NavigationUI.setupWithNavController(bottomNavigationView, navController);
+            NavigationUI.setupWithNavController(bottomNav, navController);
         }
 
-        // retirando o espaçamento do bottom menu main:
-        BottomNavigationView bottomNav = binding.bottomNav;
-
+        //  ---------------------- retirando o espaçamento do bottom menu main:
         ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             v.setPadding(0, 0, 0, 0);
             return insets;
         });
 
-        // =========================================================================
-        // OBSERVER REATIVO DE SESSÃO DO USUÁRIO
-        // =========================================================================
+        //  ---------------------- gerenciando a autenticacao
         viewModel.getUsuarioAtivo().observe(this, user -> {
+            this.currentUser = user;
+
             if (user != null) {
-                // SESSÃO ATIVA: Exibe o menu inferior
                 binding.bottomNav.setVisibility(View.VISIBLE);
 
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle("Tracker - " + user.user_name);
                 }
 
-                // Se estiver na tela de login, avança para o filtro principal
-//                if (navController != null && navController.getCurrentDestination() != null) {
-//                    if (navController.getCurrentDestination().getId() == R.id.LoginFragment) {
-//                        navController.navigate(R.id.FiltroFragment);
-//                    }
-//                }
             } else {
-                // SESSÃO INATIVA / LOGOUT: Oculta o menu inferior
                 binding.bottomNav.setVisibility(View.GONE);
 
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Tracker - Autenticação");
-                }
-
-//                // Redireciona para o login caso não esteja nele
-//                if (navController != null && navController.getCurrentDestination() != null) {
-//                    if (navController.getCurrentDestination().getId() != R.id.LoginFragment) {
-//                        navController.navigate(R.id.LoginFragment);
-//                    }
-//                }
             }
         });
 
-//        binding.fab.setOnClickListener(
-//                view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAnchorView(R.id.fab)
-//                        .setAction("Action", null).show()
-//        );
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // inflando o menu
         getMenuInflater().inflate(R.menu.top_menu_main, menu);
         return true;
     }
@@ -129,7 +107,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.theme_light) {
+        if (id == R.id.action_edit_profile) {
+            if (currentUser != null) {
+                // Futuramente, você abrirá a tela de cadastro/edição passando o ID do usuário logado
+                 Intent intent = new Intent(MainActivity.this, CadastroActivity.class);
+                 intent.putExtra("USER_ID", currentUser.id);
+                 startActivity(intent);
+            }
+            return true;
+        }
+        else if (id == R.id.action_logout) {
+            if (currentUser != null) {
+                // Aciona o método do ViewModel que altera isLogged = 0 no banco Room
+                viewModel.logout(currentUser);
+            }
+            return true;
+        }
+        else if (id == R.id.theme_light) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             return true;
         } else if (id == R.id.theme_dark) {

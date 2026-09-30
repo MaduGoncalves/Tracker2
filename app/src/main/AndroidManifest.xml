@@ -26,9 +26,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Tela de Login definida como a tela inicial (LAUNCHER) -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -39,15 +38,17 @@
         </activity>
         <activity
             android:name=".CadastroActivity"
+            android:theme="@style/Theme.Tracker"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.Tracker"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ActivityExtra"
+            android:theme="@style/Theme.Tracker"
             android:exported="false" />
     </application>
 
