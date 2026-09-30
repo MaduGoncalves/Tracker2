@@ -2,6 +2,10 @@ package com.example.tracker;
 
 import androidx.room.Embedded;
 import androidx.room.Relation;
+
+import com.example.tracker.model.Gender;
+import com.example.tracker.model.Music;
+
 import java.util.List;
 
 public class GenderWithMusics {

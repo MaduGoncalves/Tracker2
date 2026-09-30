@@ -8,6 +8,13 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.example.tracker.dados_dao.GenderDao;
+import com.example.tracker.dados_dao.MusicDao;
+import com.example.tracker.dados_dao.UserDao;
+import com.example.tracker.model.Gender;
+import com.example.tracker.model.Music;
+import com.example.tracker.model.User;
+
 import java.util.concurrent.Executors;
 
 @Database(entities = {User.class, Music.class, Gender.class}, version = 1)

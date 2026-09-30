@@ -4,6 +4,11 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 
 
+import com.example.tracker.dados_dao.GenderDao;
+import com.example.tracker.dados_dao.UserDao;
+import com.example.tracker.model.Gender;
+import com.example.tracker.model.User;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

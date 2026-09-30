@@ -1,4 +1,4 @@
-package com.example.tracker;
+package com.example.tracker.model;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;

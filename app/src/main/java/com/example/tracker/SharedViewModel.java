@@ -7,6 +7,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
+import com.example.tracker.model.Gender;
+import com.example.tracker.model.User;
+
 import java.util.List;
 public class SharedViewModel extends AndroidViewModel {
 

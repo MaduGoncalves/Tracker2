@@ -1,4 +1,4 @@
-package com.example.tracker;
+package com.example.tracker.model;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
