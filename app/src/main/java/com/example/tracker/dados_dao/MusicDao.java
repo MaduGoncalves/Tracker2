@@ -1,4 +1,6 @@
 package com.example.tracker.dados_dao;
+
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -11,8 +13,9 @@ import java.util.List;
 
 @Dao
 public interface MusicDao {
+
     @Query("SELECT * FROM musics")
-    List<Music> getAll();
+    LiveData<List<Music>> getAll();
 
     @Insert
     void insert(Music m);

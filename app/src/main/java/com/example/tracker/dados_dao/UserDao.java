@@ -1,4 +1,5 @@
 package com.example.tracker.dados_dao;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -12,19 +13,22 @@ import java.util.List;
 
 @Dao
 public interface UserDao {
-    // Método para buscar o usuário pelo ID (resolve o erro de compilação)
+
     @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
     User buscarPorId(int id);
 
-    // Retorna o usuário logado no momento via LiveData (o Room notifica a MainActivity automaticamente)
     @Query("SELECT * FROM users WHERE isLogged = 1 LIMIT 1")
     LiveData<User> getUsuarioAtivo();
 
-    // Busca o usuário pelo nome para validar a senha na tela de LoginFragment
     @Query("SELECT * FROM users WHERE user_name = :userName LIMIT 1")
     User getUserByUsername(String userName);
 
-    // Retorna a lista completa de usuários
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
+    User getUserByEmail(String email);
+
+    @Query("UPDATE users SET isLogged = 0")
+    void logoutTodos();
+
     @Query("SELECT * FROM users")
     LiveData<List<User>> getAll();
 
@@ -36,5 +40,5 @@ public interface UserDao {
 
     @Delete
     void apagar(User u);
-
 }
+

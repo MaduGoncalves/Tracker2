@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/cinza_claro"
     android:fitsSystemWindows="true"
-    tools:context=".ActivityExtra"
     style="@style/Base.Theme.Tracker"
-    >
+    tools:context=".ActivityExtra">
 
+    <!-- MENU -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,221 +30,256 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+
+    <!-- CONTEÚDO -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+
+        <!-- IMAGEM DA MÚSICA -->
         <ImageView
             android:id="@+id/imgDestaque"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+
             tools:src="@drawable/boy_with_luv" />
 
+
+        <!-- TÍTULO -->
         <TextView
             android:id="@+id/textTitulo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:textColor="@color/roxo_escuro"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imgDestaque"
-            app:layout_constraintTop_toTopOf="@+id/imgDestaque"
-            tools:text="Título da Música" />
 
+            android:layout_marginStart="16dp"
+
+            android:textColor="@color/roxo_escuro"
+            android:textSize="20sp"
+            android:textStyle="bold"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imgDestaque"
+            app:layout_constraintTop_toTopOf="@id/imgDestaque"
+
+            tools:text="Boy With Luv" />
+
+
+        <!-- ARTISTA -->
         <TextView
             android:id="@+id/textArtista"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/roxo_letra"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/textTitulo"
-            app:layout_constraintTop_toBottomOf="@+id/textTitulo"
-            tools:text="Nome do Artista - 2026" />
 
+            android:layout_marginTop="8dp"
+
+            android:textColor="@color/roxo_letra"
+            android:textSize="14sp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/textTitulo"
+            app:layout_constraintTop_toBottomOf="@id/textTitulo"
+
+            tools:text="BTS" />
+
+
+        <!-- GÊNERO -->
         <TextView
             android:id="@+id/textGenero"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+
+            android:layout_marginTop="6dp"
+
             android:textColor="@color/laranja"
             android:textSize="13sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/textTitulo"
-            app:layout_constraintTop_toBottomOf="@+id/textArtista"
-            tools:text="Gênero: Pop" />
 
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/textTitulo"
+            app:layout_constraintTop_toBottomOf="@id/textArtista"
+
+            tools:text="K-pop" />
+
+
+        <!-- INFORMAÇÕES DA MÚSICA -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardNota"
+            android:id="@+id/cardInformacoes"
             android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            app:cardBackgroundColor="@color/roxo_claro"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="20dp"
+
+            app:cardBackgroundColor="@color/branco"
             app:cardCornerRadius="12dp"
-            app:layout_constraintEnd_toStartOf="@+id/cardPlayerArea"
+
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imgDestaque">
+            app:layout_constraintTop_toBottomOf="@id/imgDestaque">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="8dp">
+                android:layout_height="wrap_content"
 
+                android:orientation="vertical"
+                android:padding="16dp">
+
+
+                <!-- ÁLBUM -->
                 <TextView
+                    android:id="@+id/labelAlbum"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/label_nota_usuarios"
-                    android:textColor="@color/branco"
+
+                    android:text="Álbum"
+                    android:textColor="@color/roxo_letra"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/textNotaMedia"
+                    android:id="@+id/textAlbum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="2dp"
+
+                    android:textColor="@color/roxo_escuro"
+                    android:textSize="15sp"
+
+                    tools:text="Love Yourself: Answer" />
+
+
+                <!-- ANO -->
+                <TextView
+                    android:id="@+id/labelAno"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:textColor="@color/branco"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    tools:text="4.5" />
+
+                    android:layout_marginTop="14dp"
+
+                    android:text="Ano"
+                    android:textColor="@color/roxo_letra"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textAno"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="2dp"
+
+                    android:textColor="@color/roxo_escuro"
+                    android:textSize="15sp"
+
+                    tools:text="2019" />
+
             </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
+
+        <!-- PLAYER -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardPlayerArea"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/branco"
+
+            android:layout_marginTop="16dp"
+
+            app:cardBackgroundColor="@color/roxo_claro"
             app:cardCornerRadius="12dp"
+
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/cardNota"
-            app:layout_constraintTop_toTopOf="@+id/cardNota">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardInformacoes">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="8dp">
 
-                <RatingBar
-                    android:id="@+id/ratingBar"
-                    style="?android:attr/ratingBarStyleSmall"
+                android:padding="16dp">
+
+
+                <!-- TÍTULO DO PLAYER -->
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:progressTint="@color/laranja"
-                    tools:rating="4.5" />
 
+                    android:text="Reprodução"
+                    android:textColor="@color/branco"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+
+                <!-- BOTÕES PLAY / STOP -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+
+                    android:layout_marginTop="12dp"
+
                     android:gravity="center"
                     android:orientation="horizontal">
+
 
                     <Button
                         android:id="@+id/btnPlay"
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_height="40dp"
+
+                        android:layout_marginEnd="6dp"
+
                         android:backgroundTint="@color/laranja"
                         android:onClick="onClickPlay"
+
                         android:text="@string/btn_play"
                         android:textColor="@color/branco"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
+
 
                     <Button
                         android:id="@+id/btnStop"
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
+
                         android:backgroundTint="@color/laranja"
                         android:onClick="onClickStop"
+
                         android:text="@string/btn_stop"
                         android:textColor="@color/branco"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
+
                 </LinearLayout>
 
+
+                <!-- ENCERRAR -->
                 <Button
                     android:id="@+id/btnEncerrar"
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_width="210dp"
+                    android:layout_height="40dp"
+
+                    android:layout_marginTop="8dp"
+
                     android:backgroundTint="@color/roxo_medio"
                     android:onClick="onClickEncerrar"
+
                     android:text="@string/btn_encerrar"
                     android:textColor="@color/branco"
-                    android:textSize="10sp" />
+                    android:textSize="11sp" />
+
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/titleReviews"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/title_reviews"
-            android:textColor="@color/roxo_letra"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardPlayerArea" />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/roxo_claro"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/titleReviews" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/branco"
-            app:cardCornerRadius="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:id="@+id/textAvaliador"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/roxo_letra"
-                    android:textStyle="bold"
-                    tools:text="Usuário Exemplo" />
-
-                <TextView
-                    android:id="@+id/textAvaliacao"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/roxo_escuro"
-                    android:textSize="12sp"
-                    tools:text="Review ou história da música aqui..." />
-            </LinearLayout>
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
