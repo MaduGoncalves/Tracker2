@@ -1,5 +1,6 @@
 package com.example.tracker;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -11,19 +12,13 @@ import java.util.List;
 @Dao
 public interface GenderDao {
     @Query("SELECT * FROM genders")
-    List<Gender> getAll();
+    LiveData<List<Gender>> getAll();
+
+    // O @Transaction é obrigatório ao usar @Relation
+    @Transaction
+    @Query("SELECT * FROM genders WHERE id = :genderId")
+    LiveData<GenderWithMusics> getGenderWithMusics(int genderId);
 
     @Insert
     void insert(Gender g);
-
-    @Update
-    void atualizar(Gender g);
-
-    @Delete
-    void apagar(Gender g);
-
-    // O @Transaction é obrigatório porque o Room fará múltiplos SELECTs
-    @Transaction
-    @Query("SELECT * FROM genders")
-    List<GenderWithMusics> getGendersWithMusics();
 }

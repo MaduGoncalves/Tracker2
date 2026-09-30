@@ -1,4 +1,5 @@
 package com.example.tracker;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
@@ -12,5 +13,11 @@ public class User {
     public String user_name;
     public String password;
     public String email;
-    public String photo;
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    public byte[] photo;
+
+    // Campo que controla se este usuário é o ativo na sessão
+    public boolean isLogged;
+
+
 }

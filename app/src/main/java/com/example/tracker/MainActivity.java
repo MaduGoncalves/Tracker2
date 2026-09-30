@@ -1,21 +1,21 @@
 package com.example.tracker;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -23,19 +23,19 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.tracker.databinding.ActivityMainBinding;
 
-import android.view.Menu;
-import android.view.MenuItem;
-
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
+    private SharedViewModel viewModel;
+    private NavController navController;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
@@ -45,12 +45,15 @@ public class MainActivity extends AppCompatActivity {
         });
         setSupportActionBar(binding.toolbar);
 
+        // Instancia o SharedViewModel
+        viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_content_main);
 
         if (navHostFragment != null) {
             // navController = gerenciador de rotas do android (sabe qual tela está ativa e para onde ir)
-            NavController navController = navHostFragment.getNavController();
+            navController = navHostFragment.getNavController();
 
             // dizendo quais telas sao consideradas "principais" (para não mostrar o botão de voltar <- na barra superior quando o usuário estiver nelas)
             appBarConfiguration = new AppBarConfiguration.Builder(
@@ -66,11 +69,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // retirando o espaçamento do bottom menu main:
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        BottomNavigationView bottomNav = binding.bottomNav;
 
         ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             v.setPadding(0, 0, 0, 0);
             return insets;
+        });
+
+        // =========================================================================
+        // OBSERVER REATIVO DE SESSÃO DO USUÁRIO
+        // =========================================================================
+        viewModel.getUsuarioAtivo().observe(this, user -> {
+            if (user != null) {
+                // SESSÃO ATIVA: Exibe o menu inferior
+                binding.bottomNav.setVisibility(View.VISIBLE);
+
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle("Tracker - " + user.user_name);
+                }
+
+                // Se estiver na tela de login, avança para o filtro principal
+//                if (navController != null && navController.getCurrentDestination() != null) {
+//                    if (navController.getCurrentDestination().getId() == R.id.LoginFragment) {
+//                        navController.navigate(R.id.FiltroFragment);
+//                    }
+//                }
+            } else {
+                // SESSÃO INATIVA / LOGOUT: Oculta o menu inferior
+                binding.bottomNav.setVisibility(View.GONE);
+
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle("Tracker - Autenticação");
+                }
+
+//                // Redireciona para o login caso não esteja nele
+//                if (navController != null && navController.getCurrentDestination() != null) {
+//                    if (navController.getCurrentDestination().getId() != R.id.LoginFragment) {
+//                        navController.navigate(R.id.LoginFragment);
+//                    }
+//                }
+            }
         });
 
 //        binding.fab.setOnClickListener(
