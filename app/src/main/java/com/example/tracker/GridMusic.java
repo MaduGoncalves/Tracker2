@@ -630,22 +630,22 @@ public class GridMusic extends Fragment {
 
         gridViewMusicas.setAdapter(adapter);
 
-        viewModel.getGeneroSelecionado().observe(
-                getViewLifecycleOwner(),
-                genero -> {
-
-                    List<ItemModel> musicasFiltradas = new ArrayList<>();
-
-                    for (ItemModel musica : listaMusicas) {
-
-                        if (musica.getGenero().equalsIgnoreCase(genero)) {
-                            musicasFiltradas.add(musica);
-                        }
-                    }
-
-                    adapter.atualizarLista(musicasFiltradas);
-                }
-        );
+//        viewModel.getGeneroSelecionado().observe(
+//                getViewLifecycleOwner(),
+//                genero -> {
+//
+//                    List<ItemModel> musicasFiltradas = new ArrayList<>();
+//
+//                    for (ItemModel musica : listaMusicas) {
+//
+//                        if (musica.getGenero().equalsIgnoreCase(genero)) {
+//                            musicasFiltradas.add(musica);
+//                        }
+//                    }
+//
+//                    adapter.atualizarLista(musicasFiltradas);
+//                }
+//        );
 
         gridViewMusicas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

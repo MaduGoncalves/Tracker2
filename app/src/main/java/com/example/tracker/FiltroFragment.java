@@ -19,6 +19,8 @@ import android.widget.TextView;
 import com.example.tracker.databinding.FragmentFiltroBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link FiltroFragment#newInstance} factory method to
@@ -65,20 +67,32 @@ public class FiltroFragment extends Fragment {
 
         spinner = view.findViewById(R.id.spinner);
 
-        // criando adapter + setando no spinner
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+        // 1. Adapter dinâmico com lista vazia (sem strings.xml)
+        ArrayAdapter<Gender> adapter = new ArrayAdapter<>(
                 requireContext(),
-                R.array.generos,
-                android.R.layout.simple_spinner_item
+                android.R.layout.simple_spinner_item,
+                new ArrayList<>()
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
+        // 2. Observa o Room para preencher o Spinner reativamente
+        viewModel.getListaGeneros().observe(getViewLifecycleOwner(), generos -> {
+            if (generos != null) {
+                adapter.clear();
+                adapter.addAll(generos);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String itemSelecionado = parent.getItemAtPosition(position).toString();
-                viewModel.setGeneroSelecionado(itemSelecionado);
+                // 3. Pega o objeto Gender e envia o ID numérico para o ViewModel
+                Gender generoSelecionado = (Gender) parent.getItemAtPosition(position);
+                if (generoSelecionado != null) {
+                    viewModel.setGeneroSelecionadoId(generoSelecionado.id);
+                }
             }
 
             @Override

@@ -657,23 +657,23 @@ public class ListMusic extends Fragment {
             }
         });
 
-        // Observando mudanças no gênero selecionado pelo Spinner
-        viewModel.getGeneroSelecionado().observe(
-                getViewLifecycleOwner(),
-                genero -> {
-
-                    List<ItemModel> musicasFiltradas = new ArrayList<>();
-
-                    for (ItemModel musica : todasAsMusicas) {
-
-                        if (musica.getGenero().equalsIgnoreCase(genero)) {
-                            musicasFiltradas.add(musica);
-                        }
-                    }
-
-                    adapter.atualizarLista(musicasFiltradas);
-                }
-        );
+//        // Observando mudanças no gênero selecionado pelo Spinner
+//        viewModel.getGeneroSelecionado().observe(
+//                getViewLifecycleOwner(),
+//                genero -> {
+//
+//                    List<ItemModel> musicasFiltradas = new ArrayList<>();
+//
+//                    for (ItemModel musica : todasAsMusicas) {
+//
+//                        if (musica.getGenero().equalsIgnoreCase(genero)) {
+//                            musicasFiltradas.add(musica);
+//                        }
+//                    }
+//
+//                    adapter.atualizarLista(musicasFiltradas);
+//                }
+//        );
     }
 
     @Override
