@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class CadastroActivity extends AppCompatActivity {
 
@@ -45,7 +46,9 @@ public class CadastroActivity extends AppCompatActivity {
     private boolean isModoEdicao = false;
     private int usuarioIdEdicao = -1;
     private byte[] fotoEmBytes = null;
+    private User usuarioExistente; // Usado no modo de edição
 
+    // Lançador de Permissão da Câmera
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
                 @Override
@@ -58,6 +61,7 @@ public class CadastroActivity extends AppCompatActivity {
                 }
             });
 
+    // Lançador para tirar a foto
     private final ActivityResultLauncher<Uri> takePictureLauncher =
             registerForActivityResult(new ActivityResultContracts.TakePicture(), new ActivityResultCallback<Boolean>() {
                 @Override
@@ -81,15 +85,16 @@ public class CadastroActivity extends AppCompatActivity {
         editSenha = findViewById(R.id.editSenha);
         textTitulo = findViewById(R.id.textTitulo);
 
-        /* DESCOMENTE PARA INICIALIZAR O BANCO DA SUA COLEGA:
+        // Inicializa o Singleton do banco de dados
         db = AppDatabase.get(this);
-        */
 
+        // Verifica se a tela foi aberta para EDIÇÃO ou CADASTRO NOVO
         if (getIntent().hasExtra("USUARIO_ID")) {
             isModoEdicao = true;
             usuarioIdEdicao = getIntent().getIntExtra("USUARIO_ID", -1);
             textTitulo.setText("Editar Perfil");
             buttonSalvar.setText("Atualizar");
+            editSenha.setHint("Nova senha (deixe em branco para manter)");
             carregarDadosParaEdicao();
         }
 
@@ -118,7 +123,7 @@ public class CadastroActivity extends AppCompatActivity {
             photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
             takePictureLauncher.launch(photoUri);
         } catch (IOException e) {
-            Toast.makeText(this, "Erro ao criar imagem", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Erro ao criar arquivo de imagem", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -132,7 +137,7 @@ public class CadastroActivity extends AppCompatActivity {
 
     private byte[] obterBytesDaFoto() {
         if (photoFile == null || !photoFile.exists()) {
-            return fotoEmBytes;
+            return fotoEmBytes; // Mantém a foto anterior se não tirou uma nova foto
         }
         try {
             return Files.readAllBytes(photoFile.toPath());
@@ -141,22 +146,27 @@ public class CadastroActivity extends AppCompatActivity {
         }
     }
 
+    // Carrega os dados do banco em segundo plano para o modo EDIÇÃO
     private void carregarDadosParaEdicao() {
-        /* DESCOMENTE PARA CARREGAR DADOS DO BANCO:
-        User user = db.userDao().buscarPorId(usuarioIdEdicao);
-        if (user != null) {
-            editNome.setText(user.user_name);
-            editEmail.setText(user.email);
-            fotoEmBytes = user.photo;
+        Executors.newSingleThreadExecutor().execute(() -> {
+            usuarioExistente = db.userDao().buscarPorId(usuarioIdEdicao);
+            if (usuarioExistente != null) {
+                runOnUiThread(() -> {
+                    editNome.setText(usuarioExistente.user_name);
+                    editEmail.setText(usuarioExistente.email);
+                    fotoEmBytes = usuarioExistente.photo;
 
-            if (user.photo != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(user.photo, 0, user.photo.length);
-                imageView.setImageBitmap(bitmap);
+                    // Converte os bytes gravados no BD de volta para Bitmap na tela
+                    if (usuarioExistente.photo != null) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(usuarioExistente.photo, 0, usuarioExistente.photo.length);
+                        imageView.setImageBitmap(bitmap);
+                    }
+                });
             }
-        }
-        */
+        });
     }
 
+    // Persiste o cadastro/edição no banco em segundo plano
     private void salvarCadastro() {
         String nome = editNome.getText().toString().trim();
         String email = editEmail.getText().toString().trim();
@@ -173,33 +183,38 @@ public class CadastroActivity extends AppCompatActivity {
             return;
         }
 
-        /* DESCOMENTE PARA PERSISTIR NO BANCO DA SUA COLEGA:
-        if (isModoEdicao) {
-            User user = db.userDao().buscarPorId(usuarioIdEdicao);
-            if (user != null) {
-                user.user_name = nome;
-                user.email = email;
+        // Executa a escrita no banco em Thread separada
+        Executors.newSingleThreadExecutor().execute(() -> {
+            if (isModoEdicao && usuarioExistente != null) {
+                usuarioExistente.user_name = nome;
+                usuarioExistente.email = email;
+
+                // Atualiza a senha apenas se o usuário digitou uma nova
                 if (!senha.isEmpty()) {
-                    user.password = SecurityUtils.hashSenha(senha);
+                    usuarioExistente.password = SecurityUtils.hashSenha(senha);
                 }
-                user.photo = fotoFinal;
-                db.userDao().atualizar(user);
-                Toast.makeText(this, "Perfil atualizado!", Toast.LENGTH_SHORT).show();
+                usuarioExistente.photo = fotoFinal;
+
+                db.userDao().atualizar(usuarioExistente);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(CadastroActivity.this, "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+            } else {
+                User novoUsuario = new User();
+                novoUsuario.user_name = nome;
+                novoUsuario.email = email;
+                novoUsuario.password = SecurityUtils.hashSenha(senha); // Criptografia obrigatória
+                novoUsuario.photo = fotoFinal; // Bytes/BLOB
+
+                db.userDao().insert(novoUsuario);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(CadastroActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
             }
-        } else {
-            User user = new User();
-            user.user_name = nome;
-            user.email = email;
-            user.password = SecurityUtils.hashSenha(senha);
-            user.photo = fotoFinal;
-
-            db.userDao().insert(user);
-            Toast.makeText(this, "Cadastro realizado!", Toast.LENGTH_SHORT).show();
-        }
-        */
-
-        // MOCK DE TESTE
-        Toast.makeText(this, "Modo de Teste: Salvo com sucesso!", Toast.LENGTH_SHORT).show();
-        finish();
+        });
     }
 }
