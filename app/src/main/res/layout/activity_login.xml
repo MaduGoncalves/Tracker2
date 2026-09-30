@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAEAEA"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Cabeçalho / Logo -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="♫ "
+            android:textColor="#C77D88"
+            android:textSize="32sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tracker"
+            android:textColor="#A65363"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="40dp"
+        android:text="Sua plataforma musical favorita"
+        android:textColor="#757575"
+        android:textSize="14sp" />
+
+    <!-- Campo E-mail -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="E-mail"
+        android:textColor="#5A2A42"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editEmail"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:hint="Insira seu e-mail"
+        android:inputType="textEmailAddress"
+        android:paddingHorizontal="16dp" />
+
+    <!-- Campo Senha -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Senha"
+        android:textColor="#5A2A42"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editSenha"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="12dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:hint="Insira sua senha"
+        android:inputType="textPassword"
+        android:paddingHorizontal="16dp" />
+
+    <!-- Opções de Lembrar-me e Esqueceu Senha -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/checkLembrar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lembrar-me"
+            android:textColor="#666666"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/textEsqueceuSenha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Esqueceu a senha?"
+            android:textColor="#B3528A"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Botão Entrar -->
+    <Button
+        android:id="@+id/buttonLogin"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:backgroundTint="#9B4B72"
+        android:text="Entrar"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Divisória -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="24dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:text="ou continue com"
+            android:textColor="#888888"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+    </LinearLayout>
+
+    <!-- Botão Criar Conta -->
+    <Button
+        android:id="@+id/buttonCadastro"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Criar Conta"
+        android:textColor="#333333" />
+
+</LinearLayout>
