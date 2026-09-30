@@ -1,4 +1,4 @@
-package com.example.tracker;
+package com.example.tracker.model;
 
 public class ItemModel {
     private final int id;

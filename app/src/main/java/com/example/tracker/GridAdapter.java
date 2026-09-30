@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.tracker.model.ItemModel;
+
 import java.util.List;
 
 public class GridAdapter extends BaseAdapter {
