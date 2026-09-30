@@ -1,24 +1,25 @@
 package com.example.tracker;
 
-
-import android.widget.BaseAdapter;
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.tracker.model.ItemModel;
+import com.example.tracker.model.Music;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemAdapter extends BaseAdapter {
 
     private final Context context;
-    private List<ItemModel> listaMusicas;
+    private List<Music> listaMusicas;
 
-    public ItemAdapter(Context context, List<ItemModel> listaMusicas) {
+    public ItemAdapter(Context context, List<Music> listaMusicas) {
         this.context = context;
         this.listaMusicas = listaMusicas;
     }
@@ -35,7 +36,7 @@ public class ItemAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return listaMusicas.get(position).getId();
+        return listaMusicas.get(position).id;
     }
 
     @Override
@@ -49,36 +50,36 @@ public class ItemAdapter extends BaseAdapter {
         ImageView imageCapa = convertView.findViewById(R.id.imageCapa);
         TextView textNome = convertView.findViewById(R.id.textNome);
         TextView textCantor = convertView.findViewById(R.id.textCantor);
-        TextView textNota = convertView.findViewById(R.id.textNota);
 
-        ItemModel musica = listaMusicas.get(position);
+        Music musica = listaMusicas.get(position);
 
-        imageCapa.setImageResource(musica.getImagem());
-        textNome.setText(musica.getNome());
-        textCantor.setText(musica.getCantor());
-        textNota.setText(criarEstrelas(musica.getNota()));
+        textNome.setText(musica.name);
+        textCantor.setText(musica.singer);
+
+        carregarImagem(imageCapa, musica.image);
 
         return convertView;
     }
 
-    public void atualizarLista(List<ItemModel> novaLista) {
-        this.listaMusicas = novaLista;
+    public void atualizarLista(List<Music> novaLista) {
+        this.listaMusicas = novaLista != null
+                ? novaLista
+                : new ArrayList<>();
+
         notifyDataSetChanged();
     }
 
-    private String criarEstrelas(double nota) {
-        int notaInteira = (int) nota;
+    private void carregarImagem(ImageView imageView, String uriImagem) {
 
-        StringBuilder estrelas = new StringBuilder();
-
-        for (int i = 0; i < 5; i++) {
-            if (i < notaInteira) {
-                estrelas.append("★");
-            } else {
-                estrelas.append("☆");
-            }
+        if (uriImagem == null || uriImagem.isEmpty()) {
+            imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+            return;
         }
 
-        return estrelas.toString();
+        try {
+            imageView.setImageURI(Uri.parse(uriImagem));
+        } catch (Exception e) {
+            imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+        }
     }
 }

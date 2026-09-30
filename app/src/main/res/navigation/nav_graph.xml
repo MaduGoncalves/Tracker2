@@ -3,27 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FiltroFragment">
+    app:startDestination="@id/LoginFragment">
 
+    <!-- Tela de Login -->
+    <fragment
+        android:id="@+id/LoginFragment"
+        android:name="com.example.tracker.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login" />
+
+    <!-- Tela de filtro/gênero -->
+    <fragment
+        android:id="@+id/FiltroFragment"
+        android:name="com.example.tracker.FiltroFragment"
+        android:label=""
+        tools:layout="@layout/fragment_filtro" />
+
+    <!-- Lista de músicas -->
     <fragment
         android:id="@+id/ListFragment"
         android:name="com.example.tracker.ListMusic"
         android:label=""
-        tools:layout="@layout/fragment_list">
-    </fragment>
+        tools:layout="@layout/fragment_list" />
+
+    <!-- Grid de músicas -->
     <fragment
         android:id="@+id/GridFragment"
         android:name="com.example.tracker.GridMusic"
         android:label=""
-        tools:layout="@layout/fragment_grid">
-
-    </fragment>
-
-
-    <fragment
-        android:id="@+id/FiltroFragment"
-        android:name="com.example.tracker.FiltroFragment"
-        android:label="">
-    </fragment>
+        tools:layout="@layout/fragment_grid" />
 
 </navigation>
+

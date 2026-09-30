@@ -10,24 +10,24 @@ import android.os.Environment;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.example.tracker.model.User;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CadastroActivity extends AppCompatActivity {
@@ -35,187 +35,675 @@ public class CadastroActivity extends AppCompatActivity {
     private ImageView imageView;
     private Button buttonCamera;
     private Button buttonSalvar;
+
     private EditText editNome;
     private EditText editEmail;
     private EditText editSenha;
-    private TextView textTitulo;
 
-    private Uri photoUri;
-    private File photoFile;
     private AppDatabase db;
 
-    private boolean isModoEdicao = false;
-    private int usuarioIdEdicao = -1;
-    private byte[] fotoEmBytes = null;
-    private User usuarioExistente; // Usado no modo de edição
+    private File photoFile;
+    private Uri photoUri;
 
-    // Lançador de Permissão da Câmera
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean granted) {
-                    if (granted) {
-                        abrirCamera();
-                    } else {
-                        Toast.makeText(CadastroActivity.this, "Permissão de câmera negada", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+    /*
+     * Foto armazenada em memória como byte[].
+     */
+    private byte[] fotoEmBytes;
 
-    // Lançador para tirar a foto
-    private final ActivityResultLauncher<Uri> takePictureLauncher =
-            registerForActivityResult(new ActivityResultContracts.TakePicture(), new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean success) {
-                    if (success) {
-                        carregarImagem();
+    /*
+     * Usuário que está sendo editado.
+     *
+     * null = novo cadastro
+     * diferente de null = edição
+     */
+    private User usuarioEditando;
+
+    private final ExecutorService executor =
+            Executors.newSingleThreadExecutor();
+
+    /*
+     * Solicita permissão para utilizar a câmera.
+     */
+    private final ActivityResultLauncher<String>
+            requestPermissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.RequestPermission(),
+                    granted -> {
+
+                        if (granted) {
+
+                            abrirCamera();
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Permissão da câmera negada",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
                     }
-                }
-            });
+            );
+
+    /*
+     * Abre a câmera externa do sistema Android.
+     */
+    private final ActivityResultLauncher<Uri>
+            takePictureLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.TakePicture(),
+                    success -> {
+
+                        if (success) {
+
+                            carregarImagem();
+
+                        } else {
+
+                            Toast.makeText(
+                                    this,
+                                    "Não foi possível tirar a foto",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_cadastro);
 
+        /*
+         * Componentes da tela.
+         */
         imageView = findViewById(R.id.imageView);
-        buttonCamera = findViewById(R.id.buttonCamera);
-        buttonSalvar = findViewById(R.id.buttonSalvar);
-        editNome = findViewById(R.id.editNome);
-        editEmail = findViewById(R.id.editEmail);
-        editSenha = findViewById(R.id.editSenha);
-        textTitulo = findViewById(R.id.textTitulo);
 
-        // Inicializa o Singleton do banco de dados
+        buttonCamera = findViewById(
+                R.id.buttonCamera
+        );
+
+        buttonSalvar = findViewById(
+                R.id.buttonSalvar
+        );
+
+        editNome = findViewById(
+                R.id.editNome
+        );
+
+        editEmail = findViewById(
+                R.id.editEmail
+        );
+
+        editSenha = findViewById(
+                R.id.editSenha
+        );
+
+        /*
+         * Banco de dados.
+         */
         db = AppDatabase.get(this);
 
-        // Verifica se a tela foi aberta para EDIÇÃO ou CADASTRO NOVO
-        if (getIntent().hasExtra("USUARIO_ID")) {
-            isModoEdicao = true;
-            usuarioIdEdicao = getIntent().getIntExtra("USUARIO_ID", -1);
-            textTitulo.setText("Editar Perfil");
-            buttonSalvar.setText("Atualizar");
-            editSenha.setHint("Nova senha (deixe em branco para manter)");
-            carregarDadosParaEdicao();
+        /*
+         * Verifica se a Activity foi aberta
+         * para edição de um usuário.
+         */
+        int usuarioId = getIntent().getIntExtra(
+                "USUARIO_ID",
+                -1
+        );
+
+        if (usuarioId != -1) {
+
+            carregarUsuario(usuarioId);
         }
 
-        buttonCamera.setOnClickListener(v -> checarPermissao());
-        buttonSalvar.setOnClickListener(v -> salvarCadastro());
+        /*
+         * Botão para tirar foto.
+         */
+        buttonCamera.setOnClickListener(
+                v -> verificarPermissaoCamera()
+        );
+
+        /*
+         * Botão salvar.
+         */
+        buttonSalvar.setOnClickListener(
+                v -> salvarCadastro()
+        );
     }
 
-    private void checarPermissao() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+    /*
+     * Verifica se o aplicativo possui
+     * permissão para usar a câmera.
+     */
+    private void verificarPermissaoCamera() {
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED) {
+
             abrirCamera();
+
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+
+            requestPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
         }
     }
 
-    private File criarArquivoImagem() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String nome = "JPEG_" + timeStamp + "_";
-        File pasta = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(nome, ".jpg", pasta);
-    }
-
+    /*
+     * Abre a câmera externa do Android.
+     */
     private void abrirCamera() {
+
         try {
+
             photoFile = criarArquivoImagem();
-            photoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", photoFile);
+
+            photoUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName()
+                            + ".fileprovider",
+                    photoFile
+            );
+
+            /*
+             * Abre a câmera do sistema.
+             */
             takePictureLauncher.launch(photoUri);
+
         } catch (IOException e) {
-            Toast.makeText(this, "Erro ao criar arquivo de imagem", Toast.LENGTH_SHORT).show();
+
+            e.printStackTrace();
+
+            Toast.makeText(
+                    this,
+                    "Erro ao criar arquivo da foto",
+                    Toast.LENGTH_SHORT
+            ).show();
         }
     }
 
+    /*
+     * Cria o arquivo temporário onde a câmera
+     * irá salvar a fotografia.
+     */
+    private File criarArquivoImagem()
+            throws IOException {
+
+        String timeStamp =
+                new SimpleDateFormat(
+                        "yyyyMMdd_HHmmss",
+                        Locale.getDefault()
+                ).format(new Date());
+
+        String nomeArquivo =
+                "JPEG_" + timeStamp + "_";
+
+        File pasta =
+                getExternalFilesDir(
+                        Environment.DIRECTORY_PICTURES
+                );
+
+        return File.createTempFile(
+                nomeArquivo,
+                ".jpg",
+                pasta
+        );
+    }
+
+    /*
+     * Mostra a foto tirada no ImageView.
+     */
     private void carregarImagem() {
-        if (photoFile != null && photoFile.exists()) {
-            Bitmap bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-            imageView.setImageBitmap(bitmap);
-            fotoEmBytes = obterBytesDaFoto();
+
+        if (photoFile != null
+                && photoFile.exists()) {
+
+            Bitmap bitmap =
+                    BitmapFactory.decodeFile(
+                            photoFile.getAbsolutePath()
+                    );
+
+            if (bitmap != null) {
+
+                imageView.setImageBitmap(bitmap);
+            }
+
+            /*
+             * Converte a foto para byte[].
+             */
+            fotoEmBytes =
+                    obterBytesDaFoto();
         }
     }
 
+    /*
+     * Converte a foto para byte[].
+     *
+     * A imagem é reduzida e comprimida antes
+     * de ser armazenada no banco.
+     */
     private byte[] obterBytesDaFoto() {
-        if (photoFile == null || !photoFile.exists()) {
-            return fotoEmBytes; // Mantém a foto anterior se não tirou uma nova foto
+
+        /*
+         * Se não existe uma nova foto,
+         * mantém a foto que já estava salva.
+         */
+        if (photoFile == null
+                || !photoFile.exists()) {
+
+            return fotoEmBytes;
         }
+
         try {
-            return Files.readAllBytes(photoFile.toPath());
-        } catch (IOException e) {
+
+            /*
+             * Carrega a imagem original.
+             */
+            Bitmap bitmap =
+                    BitmapFactory.decodeFile(
+                            photoFile.getAbsolutePath()
+                    );
+
+            if (bitmap == null) {
+
+                return null;
+            }
+
+            /*
+             * Tamanho máximo da imagem.
+             */
+            int larguraMaxima = 800;
+            int alturaMaxima = 800;
+
+            /*
+             * Calcula a escala necessária
+             * para manter a proporção da imagem.
+             */
+            float escala = Math.min(
+                    (float) larguraMaxima
+                            / bitmap.getWidth(),
+
+                    (float) alturaMaxima
+                            / bitmap.getHeight()
+            );
+
+            /*
+             * Só reduz a imagem se ela for
+             * maior que 800x800.
+             */
+            if (escala < 1.0f) {
+
+                int novaLargura =
+                        Math.round(
+                                bitmap.getWidth()
+                                        * escala
+                        );
+
+                int novaAltura =
+                        Math.round(
+                                bitmap.getHeight()
+                                        * escala
+                        );
+
+                Bitmap bitmapReduzido =
+                        Bitmap.createScaledBitmap(
+                                bitmap,
+                                novaLargura,
+                                novaAltura,
+                                true
+                        );
+
+                /*
+                 * Libera a imagem original.
+                 */
+                bitmap.recycle();
+
+                bitmap = bitmapReduzido;
+            }
+
+            /*
+             * Cria o array de bytes.
+             */
+            ByteArrayOutputStream outputStream =
+                    new ByteArrayOutputStream();
+
+            /*
+             * Comprime a imagem como JPEG.
+             *
+             * Qualidade 60 reduz bastante o tamanho
+             * do BLOB sem deixar a imagem ilegível.
+             */
+            bitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    60,
+                    outputStream
+            );
+
+            /*
+             * Libera a memória do Bitmap.
+             */
+            bitmap.recycle();
+
+            /*
+             * Retorna a imagem como byte[].
+             */
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
             return null;
         }
     }
 
-    // Carrega os dados do banco em segundo plano para o modo EDIÇÃO
-    private void carregarDadosParaEdicao() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            usuarioExistente = db.userDao().buscarPorId(usuarioIdEdicao);
-            if (usuarioExistente != null) {
-                runOnUiThread(() -> {
-                    editNome.setText(usuarioExistente.user_name);
-                    editEmail.setText(usuarioExistente.email);
-                    fotoEmBytes = usuarioExistente.photo;
+    /*
+     * Carrega os dados do usuário para edição.
+     */
+    private void carregarUsuario(int usuarioId) {
 
-                    // Converte os bytes gravados no BD de volta para Bitmap na tela
-                    if (usuarioExistente.photo != null) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(usuarioExistente.photo, 0, usuarioExistente.photo.length);
-                        imageView.setImageBitmap(bitmap);
+        executor.execute(() -> {
+
+            User usuario =
+                    db.userDao().buscarPorId(
+                            usuarioId
+                    );
+
+            runOnUiThread(() -> {
+
+                if (usuario == null) {
+
+                    Toast.makeText(
+                            this,
+                            "Usuário não encontrado",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    finish();
+
+                    return;
+                }
+
+                usuarioEditando = usuario;
+
+                /*
+                 * Preenche o nome.
+                 */
+                editNome.setText(
+                        usuario.user_name
+                );
+
+                /*
+                 * Preenche o e-mail.
+                 */
+                editEmail.setText(
+                        usuario.email
+                );
+
+                /*
+                 * Não colocamos a senha antiga
+                 * no campo.
+                 */
+                editSenha.setText("");
+
+                /*
+                 * Carrega a foto armazenada no banco.
+                 */
+                if (usuario.photo != null
+                        && usuario.photo.length > 0) {
+
+                    fotoEmBytes =
+                            usuario.photo;
+
+                    Bitmap bitmap =
+                            BitmapFactory.decodeByteArray(
+                                    usuario.photo,
+                                    0,
+                                    usuario.photo.length
+                            );
+
+                    if (bitmap != null) {
+
+                        imageView.setImageBitmap(
+                                bitmap
+                        );
                     }
+                }
+            });
+        });
+    }
+
+    /*
+     * Salva um novo usuário ou atualiza
+     * um usuário existente.
+     */
+    private void salvarCadastro() {
+
+        String nome =
+                editNome.getText()
+                        .toString()
+                        .trim();
+
+        String email =
+                editEmail.getText()
+                        .toString()
+                        .trim();
+
+        String senha =
+                editSenha.getText()
+                        .toString()
+                        .trim();
+
+        /*
+         * No cadastro a senha é obrigatória.
+         *
+         * Na edição a senha pode ficar vazia,
+         * mantendo a senha anterior.
+         */
+        if (nome.isEmpty()
+                || email.isEmpty()
+                || (usuarioEditando == null
+                && senha.isEmpty())) {
+
+            Toast.makeText(
+                    this,
+                    "Preencha todos os campos obrigatórios",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+        /*
+         * Obtém a foto em byte[].
+         */
+        byte[] fotoFinal =
+                obterBytesDaFoto();
+
+        /*
+         * Foto obrigatória.
+         */
+        if (fotoFinal == null
+                || fotoFinal.length == 0) {
+
+            Toast.makeText(
+                    this,
+                    "Tire uma foto de perfil",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+        executor.execute(() -> {
+
+            /*
+             * Verifica se já existe um usuário
+             * com esse nome.
+             */
+            User usuarioComMesmoNome =
+                    db.userDao()
+                            .getUserByUsername(nome);
+
+            /*
+             * =================================
+             * NOVO CADASTRO
+             * =================================
+             */
+            if (usuarioEditando == null) {
+
+                if (usuarioComMesmoNome != null) {
+
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    CadastroActivity.this,
+                                    "Nome de usuário já cadastrado!",
+                                    Toast.LENGTH_SHORT
+                            ).show()
+                    );
+
+                    return;
+                }
+
+                User novoUsuario =
+                        new User();
+
+                novoUsuario.user_name =
+                        nome;
+
+                novoUsuario.email =
+                        email;
+
+                /*
+                 * Criptografa a senha.
+                 */
+                novoUsuario.password =
+                        SecurityUtils.hashSenha(
+                                senha
+                        );
+
+                /*
+                 * Salva a foto como byte[].
+                 */
+                novoUsuario.photo =
+                        fotoFinal;
+
+                /*
+                 * Novo usuário começa
+                 * deslogado.
+                 */
+                novoUsuario.isLogged =
+                        false;
+
+                /*
+                 * Insere no banco.
+                 */
+                db.userDao().insert(
+                        novoUsuario
+                );
+
+                runOnUiThread(() -> {
+
+                    Toast.makeText(
+                            CadastroActivity.this,
+                            "Usuário cadastrado com sucesso!",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    finish();
+                });
+
+            }
+
+            /*
+             * =================================
+             * EDIÇÃO
+             * =================================
+             */
+            else {
+
+                /*
+                 * Verifica se o nome já pertence
+                 * a outro usuário.
+                 */
+                if (usuarioComMesmoNome != null
+                        && usuarioComMesmoNome.id
+                        != usuarioEditando.id) {
+
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    CadastroActivity.this,
+                                    "Nome de usuário já cadastrado!",
+                                    Toast.LENGTH_SHORT
+                            ).show()
+                    );
+
+                    return;
+                }
+
+                /*
+                 * Atualiza nome.
+                 */
+                usuarioEditando.user_name =
+                        nome;
+
+                /*
+                 * Atualiza e-mail.
+                 */
+                usuarioEditando.email =
+                        email;
+
+                /*
+                 * Se uma nova senha foi digitada,
+                 * criptografa e salva.
+                 */
+                if (!senha.isEmpty()) {
+
+                    usuarioEditando.password =
+                            SecurityUtils.hashSenha(
+                                    senha
+                            );
+                }
+
+                /*
+                 * Atualiza a foto.
+                 */
+                usuarioEditando.photo =
+                        fotoFinal;
+
+                /*
+                 * Atualiza no banco.
+                 */
+                db.userDao().atualizar(
+                        usuarioEditando
+                );
+
+                runOnUiThread(() -> {
+
+                    Toast.makeText(
+                            CadastroActivity.this,
+                            "Perfil atualizado com sucesso!",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    finish();
                 });
             }
         });
     }
 
-    // Persiste o cadastro/edição no banco em segundo plano
-    private void salvarCadastro() {
-        String nome = editNome.getText().toString().trim();
-        String email = editEmail.getText().toString().trim();
-        String senha = editSenha.getText().toString().trim();
+    @Override
+    protected void onDestroy() {
 
-        if (nome.isEmpty() || email.isEmpty() || (senha.isEmpty() && !isModoEdicao)) {
-            Toast.makeText(this, "Preencha todos os campos obrigatórios", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        super.onDestroy();
 
-        byte[] fotoFinal = obterBytesDaFoto();
-        if (fotoFinal == null) {
-            Toast.makeText(this, "Tire uma foto de perfil", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Executa a escrita no banco em Thread separada
-        Executors.newSingleThreadExecutor().execute(() -> {
-            if (isModoEdicao && usuarioExistente != null) {
-                usuarioExistente.user_name = nome;
-                usuarioExistente.email = email;
-
-                // Atualiza a senha apenas se o usuário digitou uma nova
-                if (!senha.isEmpty()) {
-                    usuarioExistente.password = SecurityUtils.hashSenha(senha);
-                }
-                usuarioExistente.photo = fotoFinal;
-
-                db.userDao().atualizar(usuarioExistente);
-
-                runOnUiThread(() -> {
-                    Toast.makeText(CadastroActivity.this, "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
-                    finish();
-                });
-            } else {
-                User novoUsuario = new User();
-                novoUsuario.user_name = nome;
-                novoUsuario.email = email;
-                novoUsuario.password = SecurityUtils.hashSenha(senha); // Criptografia obrigatória
-                novoUsuario.photo = fotoFinal; // Bytes/BLOB
-
-                db.userDao().insert(novoUsuario);
-
-                runOnUiThread(() -> {
-                    Toast.makeText(CadastroActivity.this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
-                    finish();
-                });
-            }
-        });
+        executor.shutdown();
     }
 }

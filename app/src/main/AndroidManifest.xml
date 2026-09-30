@@ -5,6 +5,11 @@
     <!-- Permissão de acesso à Câmera -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Indica que o aplicativo utiliza a câmera -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -26,6 +31,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Tela de Login definida como a tela inicial (LAUNCHER) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -38,9 +44,10 @@
         </activity>
         <activity
             android:name=".CadastroActivity"
-            android:theme="@style/Theme.Tracker"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Tela de detalhes da música -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
@@ -48,7 +55,6 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ActivityExtra"
-            android:theme="@style/Theme.Tracker"
             android:exported="false" />
     </application>
 
