@@ -1,80 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="?attr/android:colorBackground"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
+
+        <!-- LOGO TRACKER -->
+        <ImageView
+            android:layout_width="155dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="2dp"
+            android:contentDescription="@string/Tracker"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo_tracker" />
 
         <TextView
             android:id="@+id/textTitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:text="Cadastro de Usuário"
-            android:textColor="#5A2A42"
-            android:textSize="22sp"
+            android:text="@string/titulo_cadastro"
+            android:textColor="?attr/android:textColor"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
+        <!-- FOTO DE PERFIL -->
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:background="#DDD"
-            android:scaleType="centerCrop" />
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/cinza_claro"
+            android:contentDescription="@null"
+            android:padding="22dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_camera" />
 
+        <!-- BOTÃO TIRAR FOTO -->
         <Button
             android:id="@+id/buttonCamera"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            style="@style/EstiloBotaoPadrao"
+            android:layout_width="150dp"
+            android:layout_height="38dp"
             android:layout_marginBottom="20dp"
-            android:text="Tirar Foto" />
+            android:text="@string/btn_tirar_foto"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
 
-        <EditText
-            android:id="@+id/editNome"
+        <!-- NOME -->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="12dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:hint="Nome completo"
-            android:inputType="textPersonName"
-            android:paddingHorizontal="16dp" />
+            android:layout_height="wrap_content"
+            android:text="@string/nome"
+            android:textColor="@color/roxo_medio"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/editEmail"
+        <!-- CAMPO NOME -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="12dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:hint="E-mail"
-            android:inputType="textEmailAddress"
-            android:paddingHorizontal="16dp" />
+            android:layout_height="38dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="13dp"
+            android:background="@drawable/bg_edittext"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp">
 
-        <EditText
-            android:id="@+id/editSenha"
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:contentDescription="@null"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_name" />
+
+            <EditText
+                android:id="@+id/editNome"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/text_nome"
+                android:inputType="textPersonName"
+                android:paddingStart="7dp"
+                android:paddingEnd="4dp"
+                android:singleLine="true"
+                android:textColor="?attr/android:textColor"
+                android:textColorHint="#999999"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <!-- E-MAIL -->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="24dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:hint="Senha"
-            android:inputType="textPassword"
-            android:paddingHorizontal="16dp" />
+            android:layout_height="wrap_content"
+            android:text="@string/email"
+            android:textColor="@color/roxo_medio"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
+        <!-- CAMPO E-MAIL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="13dp"
+            android:background="@drawable/bg_edittext"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:contentDescription="@null"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_email" />
+
+            <EditText
+                android:id="@+id/editEmail"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/text_email"
+                android:inputType="textEmailAddress"
+                android:paddingStart="7dp"
+                android:paddingEnd="4dp"
+                android:singleLine="true"
+                android:textColor="?attr/android:textColor"
+                android:textColorHint="#999999"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <!-- SENHA -->
+        <TextView
+            android:id="@+id/textLabelSenha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/senha"
+            android:textColor="@color/roxo_medio"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- CAMPO SENHA -->
+        <LinearLayout
+            android:id="@+id/layoutCampoSenha"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_edittext"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:contentDescription="@null"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_lock" />
+
+            <EditText
+                android:id="@+id/editSenha"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/text_senha"
+                android:inputType="textPassword"
+                android:paddingStart="7dp"
+                android:paddingEnd="4dp"
+                android:singleLine="true"
+                android:textColor="?attr/android:textColor"
+                android:textColorHint="#999999"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <!-- BOTÃO SALVAR -->
         <Button
             android:id="@+id/buttonSalvar"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:backgroundTint="#9B4B72"
-            android:text="Salvar Cadastro"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            style="@style/EstiloBotaoPadrao"
+            android:layout_width="150dp"
+            android:layout_height="38dp"
+            android:layout_marginBottom="24dp"
+            android:text="@string/btn_salvar_cadastro"
+            android:textAllCaps="false"
+            android:textSize="13sp"
             android:textStyle="bold" />
+
+        <!-- RODAPÉ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="@string/Tracker"
+            android:textColor="@color/laranja"
+            android:textSize="16sp" />
 
     </LinearLayout>
 </ScrollView>

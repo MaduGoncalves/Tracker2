@@ -23,6 +23,21 @@
     <string name="text_senha"> Insira sua senha</string>
 
     <!-- ====================================================== -->
+    <!-- CADASTRO -->
+    <!-- ====================================================== -->
+
+    <string name="titulo_cadastro">Cadastro de Usuário</string>
+    <string name="btn_tirar_foto">Tirar Foto</string>
+    <string name="nome">Nome:</string>
+    <string name="text_nome">Insira seu nome completo</string>
+    <string name="btn_salvar_cadastro">Salvar Cadastro</string>
+
+    <!-- ====================================================== -->
+    <!-- EDIÇÃO -->
+    <!-- ====================================================== -->
+    <string name="titulo_editar">Editar Perfil</string>
+    <string name="btn_salvar_alteracoes">Salvar Alterações</string>
+    <!-- ====================================================== -->
     <!-- GÊNEROS -->
     <!-- ====================================================== -->
 

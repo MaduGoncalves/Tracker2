@@ -136,8 +136,8 @@ public abstract class AppDatabase extends RoomDatabase {
         m.year = ano;
         m.album = album;
         m.gender = generoId;
-        m.image = uriImagem; // Guarda o URI completo como String (ex: android.resource://...)
-        m.audio = uriAudio;  // Guarda o URI completo como String (ex: android.resource://...)
+        m.image = uriImagem;
+        m.audio = uriAudio;
         return m;
     }
 }

@@ -7,9 +7,12 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -39,6 +42,9 @@ public class CadastroActivity extends AppCompatActivity {
     private EditText editNome;
     private EditText editEmail;
     private EditText editSenha;
+    private TextView textLabelSenha;
+    private LinearLayout layoutCampoSenha;
+    private TextView textTitulo;
 
     private AppDatabase db;
 
@@ -141,6 +147,18 @@ public class CadastroActivity extends AppCompatActivity {
                 R.id.editSenha
         );
 
+        textLabelSenha = findViewById(
+                R.id.textLabelSenha
+        );
+
+        layoutCampoSenha = findViewById(
+                R.id.layoutCampoSenha
+        );
+
+        textTitulo = findViewById(
+                R.id.textTitulo
+        );
+
         /*
          * Banco de dados.
          */
@@ -156,6 +174,10 @@ public class CadastroActivity extends AppCompatActivity {
         );
 
         if (usuarioId != -1) {
+            if (textLabelSenha != null) textLabelSenha.setVisibility(View.GONE);
+            if (layoutCampoSenha != null) layoutCampoSenha.setVisibility(View.GONE);
+            if (textTitulo != null) textTitulo.setText(R.string.titulo_editar);
+            buttonSalvar.setText(R.string.btn_salvar_alteracoes);
 
             carregarUsuario(usuarioId);
         }
@@ -271,7 +293,8 @@ public class CadastroActivity extends AppCompatActivity {
                     );
 
             if (bitmap != null) {
-
+                imageView.setPadding(0, 0, 0, 0);
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setImageBitmap(bitmap);
             }
 
@@ -471,8 +494,7 @@ public class CadastroActivity extends AppCompatActivity {
 
                     if (bitmap != null) {
 
-                        imageView.setImageBitmap(
-                                bitmap
+                        imageView.setImageBitmap(bitmap
                         );
                     }
                 }
