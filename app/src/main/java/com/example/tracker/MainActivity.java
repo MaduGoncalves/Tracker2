@@ -115,9 +115,6 @@ public class MainActivity extends AppCompatActivity {
             if (user != null) {
                 binding.bottomNav.setVisibility(View.VISIBLE);
 
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Tracker - " + user.user_name);
-                }
 
                 // Se estiver no LoginFragment, avança para o filtro principal
                 if (navController != null && navController.getCurrentDestination() != null) {

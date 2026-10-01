@@ -8,27 +8,11 @@
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cinza_claro"
     android:fitsSystemWindows="true"
     style="@style/Base.Theme.Tracker"
     tools:context=".ActivityExtra">
 
-    <!-- MENU -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/MENU">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="@string/activity_extra"
-            app:titleTextColor="@color/branco"
-            app:menu="@menu/top_menu_main"
-            app:popupTheme="@style/SettingsPopUp" />
-
-    </com.google.android.material.appbar.AppBarLayout>
 
 
     <!-- CONTEÚDO -->
@@ -114,12 +98,8 @@
             android:id="@+id/cardInformacoes"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-
             android:layout_marginTop="20dp"
-
-            app:cardBackgroundColor="@color/branco"
             app:cardCornerRadius="12dp"
-
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imgDestaque">
