@@ -1,14 +1,16 @@
 package com.example.tracker;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -22,6 +24,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.tracker.databinding.ActivityMainBinding;
+import com.example.tracker.model.User;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedViewModel viewModel;
     private NavController navController;
     private ActivityMainBinding binding;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,145 +46,174 @@ public class MainActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(
                 binding.main,
                 (v, insets) -> {
-
                     Insets systemBars = insets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
                     );
-
                     v.setPadding(
                             systemBars.left,
                             systemBars.top,
                             systemBars.right,
                             systemBars.bottom
                     );
-
                     return insets;
                 }
         );
 
         setSupportActionBar(binding.toolbar);
 
-        // SharedViewModel
-        viewModel = new ViewModelProvider(this)
-                .get(SharedViewModel.class);
-
-        // NavHost
-        NavHostFragment navHostFragment =
-                (NavHostFragment) getSupportFragmentManager()
-                        .findFragmentById(
-                                R.id.nav_host_fragment_content_main
-                        );
+        viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         BottomNavigationView bottomNav = binding.bottomNav;
 
-        //  ---------------------- gerenciando a navegacao
+        // Gerenciando a navegação
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_content_main);
         if (navHostFragment != null) {
-            // navController = gerenciador de rotas do android (sabe qual tela está ativa e para onde ir)
             navController = navHostFragment.getNavController();
 
-            // dizendo quais telas sao consideradas "principais" (para não mostrar o botão de voltar <- na barra superior quando o usuário estiver nelas)
             appBarConfiguration = new AppBarConfiguration.Builder(
                     R.id.FiltroFragment,
                     R.id.ListFragment,
-                    R.id.GridFragment
+                    R.id.GridFragment,
+                    R.id.LoginFragment
             ).build();
 
-            // ActionBar
             NavigationUI.setupActionBarWithNavController(
                     this,
                     navController,
                     appBarConfiguration
             );
 
-            // pegando a barra de navegacao do xml
             BottomNavigationView bottomNavigationView = binding.bottomNav;
-
-            // conectando os cliques dos botoes do menu com a troca de telas do navcontroller
             NavigationUI.setupWithNavController(bottomNavigationView, navController);
+
+            // Esconde ou mostra a barra superior inteira dependendo se está no Login
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                if (getSupportActionBar() != null) {
+                    if (destination.getId() == R.id.LoginFragment) {
+                        getSupportActionBar().hide();
+                    } else {
+                        getSupportActionBar().show();
+                    }
+                }
+            });
         }
 
-        // retirando o espaçamento do bottom menu main:
-        BottomNavigationView bottomNav = binding.bottomNav;
-
+        // Retirando o espaçamento do bottom menu main:
         ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
             v.setPadding(0, 0, 0, 0);
             return insets;
         });
 
-        // =========================================================================
-        // OBSERVER REATIVO DE SESSÃO DO USUÁRIO
-        // =========================================================================
+        // Gerenciando a autenticação via ViewModel
         viewModel.getUsuarioAtivo().observe(this, user -> {
+            this.currentUser = user;
+
+            // Força o menu a se redesenhar sempre que o estado do usuário mudar (atualiza a foto)
+            invalidateOptionsMenu();
+
             if (user != null) {
-                // SESSÃO ATIVA: Exibe o menu inferior
                 binding.bottomNav.setVisibility(View.VISIBLE);
 
                 if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle(
-                            "Tracker - " + user.user_name
-                    );
+                    getSupportActionBar().setTitle("Tracker - " + user.user_name);
                 }
 
-                // Se estiver no LoginFragment,
-                // vai para o FiltroFragment
-                if (navController != null
-                        && navController.getCurrentDestination() != null) {
-
-                    int destinoAtual =
-                            navController.getCurrentDestination().getId();
-
-                    if (destinoAtual == R.id.LoginFragment) {
-
-                        navController.navigate(
-                                R.id.FiltroFragment
-                        );
+                // Se estiver no LoginFragment, avança para o filtro principal
+                if (navController != null && navController.getCurrentDestination() != null) {
+                    if (navController.getCurrentDestination().getId() == R.id.LoginFragment) {
+                        navController.navigate(R.id.FiltroFragment);
                     }
                 }
-
-                // Se estiver na tela de login, avança para o filtro principal
-//                if (navController != null && navController.getCurrentDestination() != null) {
-//                    if (navController.getCurrentDestination().getId() == R.id.LoginFragment) {
-//                        navController.navigate(R.id.FiltroFragment);
-//                    }
-//                }
             } else {
-                // SESSÃO INATIVA / LOGOUT: Oculta o menu inferior
                 binding.bottomNav.setVisibility(View.GONE);
 
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle("Tracker - Autenticação");
                 }
 
-//                // Redireciona para o login caso não esteja nele
-//                if (navController != null && navController.getCurrentDestination() != null) {
-//                    if (navController.getCurrentDestination().getId() != R.id.LoginFragment) {
-//                        navController.navigate(R.id.LoginFragment);
-//                    }
-//                }
+                // Redireciona para o login caso não esteja nele
+                if (navController != null && navController.getCurrentDestination() != null) {
+                    if (navController.getCurrentDestination().getId() != R.id.LoginFragment) {
+                        navController.navigate(R.id.LoginFragment);
+                    }
+                }
             }
         });
-
-//        binding.fab.setOnClickListener(
-//                view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAnchorView(R.id.fab)
-//                        .setAction("Action", null).show()
-//        );
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.top_menu_main, menu);
         return true;
+    }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (currentUser != null) {
+            MenuItem profileItem = menu.findItem(R.id.action_profile);
+            if (profileItem != null) {
+                // Substitua 'fotoPerfil' pelo nome do atributo que guarda os bytes no seu model User
+                byte[] fotoBytes = currentUser.photo;
+
+                if (fotoBytes != null && fotoBytes.length > 0) {
+                    // Converte o array de bytes em Bitmap original
+                    Bitmap bitmapOriginal = BitmapFactory.decodeByteArray(fotoBytes, 0, fotoBytes.length);
+
+                    if (bitmapOriginal != null) {
+                        // Transforma o Bitmap em uma versão circular
+                        Bitmap bitmapCircular = getCircularBitmap(bitmapOriginal);
+
+                        // Aplica no ícone do menu
+                        Drawable drawable = new BitmapDrawable(getResources(), bitmapCircular);
+                        profileItem.setIcon(drawable);
+                    }
+                }
+            }
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    // Método auxiliar para arredondar o Bitmap em formato de círculo perfeito
+    private Bitmap getCircularBitmap(Bitmap source) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int size = Math.min(width, height);
+
+        // Cria um bitmap quadrado com o menor lado para garantir um círculo perfeito
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(output);
+
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setAntiAlias(true);
+        paint.setShader(new android.graphics.BitmapShader(source,
+                android.graphics.Shader.TileMode.CLAMP,
+                android.graphics.Shader.TileMode.CLAMP));
+
+        float radius = size / 2f;
+        canvas.drawCircle(radius, radius, radius, paint);
+
+        return output;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.theme_light) {
+        if (id == R.id.action_edit_profile) {
+            if (currentUser != null) {
+                Intent intent = new Intent(MainActivity.this, CadastroActivity.class);
+                intent.putExtra("USUARIO_ID", currentUser.id);
+                startActivity(intent);
+            }
+            return true;
+        }
+        else if (id == R.id.action_logout) {
+            if (currentUser != null) {
+                viewModel.logout(currentUser);
+            }
+            return true;
+        }
+        else if (id == R.id.theme_light) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             return true;
         } else if (id == R.id.theme_dark) {

@@ -41,7 +41,8 @@ public class Repository {
     public void logout(User user) {
         executor.execute(() -> {
             if (user != null) {
-                userDao.atualizar(user);
+                user.isLogged = false; // Altera a flag para deslogado
+                userDao.atualizar(user); // Salva no banco
             }
         });
     }
